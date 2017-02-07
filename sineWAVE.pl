@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/perl
 
 use strict;
 #use warnings;
@@ -9,7 +9,11 @@ use POSIX;
 #
 # The Bangsplat Non-Realtime Software Synthesizer
 # (AKA sineWAVE.pl)
-# version 1.2
+# version 1.2.1
+#
+#
+# created ??? (probably February 2009)
+# modified 2017-02-06
 #
 
 my ( $output_param, $channel_param, $samplerate_param, $samplesize_param );
@@ -114,7 +118,7 @@ if ( $debug_param ) {
 # parameter processing
 if ( $help_param ) {
 	print "sineWAVE.pl\n";
-	print "version 1.2\n";
+	print "version 1.2.1\n";
 	print "\n";
 	print "Input Parameters:\n";
 	print "\t--output|-o <output_filename>\n";
@@ -127,7 +131,7 @@ if ( $help_param ) {
 	print "\t--level|-l <level> normalize to this peak level\n";
 	exit;
 }
-if ( $version_param ) { die "sineWAVE version 1.2\n"; }		# --version
+if ( $version_param ) { die "sineWAVE version 1.2.1\n"; }		# --version
 if ( $output_param eq undef ) { die "Please specify output file\n"; }
 if ( $frequency_param eq undef ) { die "Please specify a frequency list\n"; }
 if ( $channel_param eq undef ) { $channel_param = 1; }
