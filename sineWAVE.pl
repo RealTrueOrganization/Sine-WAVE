@@ -9,11 +9,11 @@ use POSIX;
 #
 # The Bangsplat Non-Realtime Software Synthesizer
 # (AKA sineWAVE.pl)
-# version 1.2.1
+# version 1.3
 #
 #
 # created ??? (probably February 2009)
-# modified 2017-02-06
+# modified 2017-02-07
 #
 
 my ( $output_param, $channel_param, $samplerate_param, $samplesize_param );
@@ -31,6 +31,8 @@ my ( $freq, $coef, $fp_sample, $quant_sample, $quant_string );
 my $bytes_per_sample;
 my $peak_sample_value = 0.0;
 my $wav_header;
+my $result;
+my $frequency_file;
 
 my $twopi = 2.0 * 3.141592653589793;
 
@@ -118,7 +120,7 @@ if ( $debug_param ) {
 # parameter processing
 if ( $help_param ) {
 	print "sineWAVE.pl\n";
-	print "version 1.2.1\n";
+	print "version 1.3\n";
 	print "\n";
 	print "Input Parameters:\n";
 	print "\t--output|-o <output_filename>\n";
@@ -126,12 +128,13 @@ if ( $help_param ) {
 	print "\t--samplesize|-b [16|24] (bit depth, default: 24)\n";
 	print "\t--samplerate|-s <sampling_rate> (default: 96000)\n";
 	print "\t--frequency|-f comma-separated frequency/coefficient list\n";
+	print "\t\tor file name of comma-separated frequency/coefficient list\n";
 	print "\t--duration|-d <duration> (in seconds, default: 1)\n";
 	print "\t--adsr|--env <envelope>\n";
 	print "\t--level|-l <level> normalize to this peak level\n";
 	exit;
 }
-if ( $version_param ) { die "sineWAVE version 1.2.1\n"; }		# --version
+if ( $version_param ) { die "sineWAVE version 1.3\n"; }		# --version
 if ( $output_param eq undef ) { die "Please specify output file\n"; }
 if ( $frequency_param eq undef ) { die "Please specify a frequency list\n"; }
 if ( $channel_param eq undef ) { $channel_param = 1; }
@@ -155,12 +158,51 @@ if ( $level_param < 0.0 ) { $level_param = 1.0; }
 
 # process the frequency list
 @frequency_list = split( /,/, $frequency_param );
-### check here for length?
+# $list_length = $#frequency_list + 1;
+$list_length = scalar @frequency_list;
+### check length here?
 ### if @frequency_list has only one item
 ### 	try to open a file with the name
 ### 	read in the contents of the file
 ### 	and place it in @frequency_list
-$list_length = $#frequency_list + 1;
+if ( $list_length eq 1 ) {
+	# only one item was provided
+	# assume this is a file name that contains the frequency list
+	if ( $debug_param ) {
+		print "DEBUG: trying to open frequency list file @frequency_list[0]\n";
+	}
+	$frequency_file = @frequency_list[0];
+	if ( $debug_param ) {
+		print "DEBUG: frequency_file: $frequency_file\n";
+	}
+	# open the file
+	open( FREQ_FILE, "<", $frequency_file ) or die "Can't open frequency list file\n";
+	# how big is the file?
+	my $frequency_file_size = -s FREQ_FILE;
+	if ( $debug_param ) {
+		print "DEBUG: frequency_file_size: $frequency_file_size\n";
+	}
+	# read the file into $frequency_param;
+	$result = read( FREQ_FILE, $frequency_param, $frequency_file_size );
+	if ( $result eq undef ) { die "Error reading input file $frequency_file\n"; }
+	if ( $result eq 0 ) { print "WARNING: Input file is 0 bytes\n"; }
+	chomp( $frequency_param );
+	# close the file
+	close( FREQ_FILE );
+	if ( $debug_param ) {
+		print "DEBUG: frequency list file contents:\n*****$frequency_param*****\n";
+	}
+	# repeat "@frequency_list = split( /,/, $frequency_param )" from above
+	@frequency_list = split( /,/, $frequency_param );
+	# repeat "$list_length = scalar @frequency_list" from above
+	$list_length = scalar @frequency_list;
+	if ( $debug_param) {
+		print "DEBUG: frequency list file list length = $list_length\n";
+	}
+	# now check to make sure we actually got something
+	if ( $list_length < 2 ) { die "Please specify a frequency list or file\n"; }
+}
+###
 $num_frequencies = $list_length / 2;
 if ( $debug_param ) {
 	print "DEBUG";
