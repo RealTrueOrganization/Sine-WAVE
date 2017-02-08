@@ -143,8 +143,23 @@ if ( $level_param eq undef ) { $level_param = 1.0; }
 if ( $level_param > 1.0 ) { $level_param = 1.0; }
 if ( $level_param < 0.0 ) { $level_param = 1.0; }
 
+###
+# allow two options for --frequency
+# if $output_param has only one item,
+# 	treat it as a text file containing the frequency/coefficient list
+# if $output_param has two or more items,
+# 	treat it as we currently do - parse out a comma-delimited list
+# if $output_param eq undef,
+# 	error out (as above)
+###
+
 # process the frequency list
 @frequency_list = split( /,/, $frequency_param );
+### check here for length?
+### if @frequency_list has only one item
+### 	try to open a file with the name
+### 	read in the contents of the file
+### 	and place it in @frequency_list
 $list_length = $#frequency_list + 1;
 $num_frequencies = $list_length / 2;
 if ( $debug_param ) {
