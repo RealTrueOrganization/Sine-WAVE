@@ -9,11 +9,11 @@ use POSIX;
 #
 # The Bangsplat Non-Realtime Software Synthesizer
 # (AKA sineWAVE.pl)
-# version 1.3
+# version 1.3.1
 #
 #
 # created ??? (probably February 2009)
-# modified 2017-02-07
+# modified 2017-02-10
 #
 
 my ( $output_param, $channel_param, $samplerate_param, $samplesize_param );
@@ -33,6 +33,7 @@ my $peak_sample_value = 0.0;
 my $wav_header;
 my $result;
 my $frequency_file;
+my ( $start_time, $stop_time, $total_time );
 
 my $twopi = 2.0 * 3.141592653589793;
 
@@ -87,6 +88,8 @@ sub generate_wav_header {
 
 # main
 
+$start_time = time;
+
 # parse the input parameters
 GetOptions(	'output|o=s'		=> \$output_param,
 		'channels|c=i'		=> \$channel_param,
@@ -102,6 +105,7 @@ GetOptions(	'output|o=s'		=> \$output_param,
 
 if ( $debug_param ) {
 	print "DEBUG";
+	print "Start time: $start_time\n";
 	print "\tInput Parameters:\n";
 	print "\t\toutput_param: $output_param\n";
 	print "\t\tchannel_param: $channel_param\n";
@@ -395,3 +399,10 @@ for ( my $n = 0; $n < $num_samples; $n++ ) {
 }
 
 close( WAV_FILE );
+
+$stop_time = time;
+
+$total_time = $stop_time - $start_time;
+
+print "That took $total_time seconds\n";
+
